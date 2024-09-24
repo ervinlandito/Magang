@@ -1,0 +1,19 @@
+body {
+  width: 100vw;
+}
+
+.row-long {
+  min-width: 200px;
+  max-width: 400px;
+}
+
+.form-input {
+  width: 100%;
+  margin-bottom: 1rem;
+  border-radius: 6px;
+  border: solid 1px grey;
+}
+
+.btn-submit {
+  width: 100%;
+}

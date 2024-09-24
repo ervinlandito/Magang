@@ -1,0 +1,10 @@
+.form-input {
+  width: 100%;
+  margin-bottom: 1rem;
+  border-radius: 6px;
+  border: solid 1px grey;
+}
+
+.btn-submit {
+  width: 100%;
+}
