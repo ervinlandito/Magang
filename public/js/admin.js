@@ -1,6 +1,23 @@
 const form = document.getElementById("addDataForm");
 const deleteButtons = document.querySelectorAll(".btnDelete");
 const logoutButton = document.getElementById("btnLogout");
+const searchInput = document.getElementById("searchInput");
+
+searchInput.addEventListener("input", function () {
+  const searchValue = searchInput.value.toLowerCase();
+  const tableRows = document.querySelectorAll("tbody tr");
+
+  tableRows.forEach(function (row) {
+    const umkmName = row
+      .querySelector("td:first-child")
+      .textContent.toLowerCase();
+    if (umkmName.includes(searchValue)) {
+      row.style.display = "";
+    } else {
+      row.style.display = "none";
+    }
+  });
+});
 
 form.addEventListener("submit", async () => {
   const umkmName = document.getElementById("umkm_name").value;
