@@ -11,7 +11,7 @@
       crossorigin="anonymous"
     />
 
-    <link rel="stylesheet" href="/css/login.css" />
+    <link rel="stylesheet" href="/css/register.css" />
 
     <link
       rel="stylesheet"
@@ -27,13 +27,29 @@
       <div class="form-block">
         <h3 class="text-center">Register</h3>
         <form id="registerForm">
-          <div class="form-group first">
-            <label for="username">Username</label>
-            <input type="text" class="form-control" id="username" />
+          <div class="form-group first mb-2">
+            <label for="email">Email</label>
+            <input type="email" class="form-control" id="email" />
+            <small id="emailError" class="text-danger"></small>
           </div>
-          <div class="form-group last mb-4">
+          <div class="form-group mb-2">
             <label for="password">Password</label>
             <input type="password" class="form-control" id="password" />
+            <p class="text-muted">
+              * Kata sandi harus terdiri dari minimal 8 karakter, dan terdiri
+              dari satu huruf besar, satu huruf kecil, satu angka, dan satu
+              karakter khusus
+            </p>
+            <small id="passwordError" class="text-danger"></small>
+          </div>
+          <div class="form-group last mb-2">
+            <label for="confirmPassword">Confirm Password</label>
+            <input type="password" class="form-control" id="confirmPassword" />
+            <small id="confirmPasswordError" class="text-danger"></small>
+          </div>
+          <div class="form-group mb-4">
+            <input type="checkbox" id="togglePassword" />
+            <label for="togglePassword">Show Password</label>
           </div>
           <button
             id="btnRegister"

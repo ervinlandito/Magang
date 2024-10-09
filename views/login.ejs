@@ -22,23 +22,27 @@
   </head>
   <body>
     <div
-      class="d-flex justify-content-center align-items-center form-container"
+      class="d-flex flex-column justify-content-center align-items-center form-container"
     >
       <div class="form-block">
         <h3 class="text-center">Sign In</h3>
         <form id="loginForm">
-          <div class="form-group first">
-            <label for="username">Username</label>
-            <input type="text" class="form-control" id="username" />
+          <div class="form-group first mb-2">
+            <label for="email">Email</label>
+            <input type="email" class="form-control" id="email" />
           </div>
-          <div class="form-group last mb-4">
+          <div class="form-group last mb-2">
             <label for="password">Password</label>
             <input type="password" class="form-control" id="password" />
+          </div>
+          <div class="form-group"></div>
+            <input type="checkbox" id="togglePassword" />
+            <label for="togglePassword">Show Password</label>
           </div>
           <button
             id="btnLogin"
             type="submit"
-            class="btn rounded rounded-3 text-white btn-block btn-primary py-2"
+            class="btn rounded rounded-3 text-white btn-block btn-primary py-2 mt-4"
           >
             Sign In
           </button>
