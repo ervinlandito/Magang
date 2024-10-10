@@ -3,6 +3,8 @@ const bodyparser = require("body-parser");
 const path = require("path");
 const mysql = require("mysql2");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+const validNIPs = require("./constants/data-nip");
 const cookieParser = require("cookie-parser");
 require("dotenv").config();
 
@@ -25,9 +27,9 @@ const db = mysql.createConnection({
 
 db.connect((err) => {
   if (err) {
-    console.error('Koneksi ke MySQL gagal:', err);
+    console.error("Koneksi ke MySQL gagal:", err);
   } else {
-    console.log('Terhubung ke MySQL');
+    console.log("Terhubung ke MySQL");
   }
 });
 
@@ -57,7 +59,6 @@ app.get("/tjs/admin/dashboard", (req, res) => {
   }
 });
 
-
 app.get("/tjs/admin/edit/:id", (req, res) => {
   const id = req.params.id;
   res.render("editForm", { id });
@@ -65,50 +66,63 @@ app.get("/tjs/admin/edit/:id", (req, res) => {
 
 // API routes
 app.post("/api/admin/login", (req, res) => {
-  const { username, password } = req.body;
+  const { nip, password } = req.body;
 
   db.query(
-    "SELECT * FROM admin WHERE username = ? AND password = ?",
-    [username, password],
+    "SELECT * FROM admin WHERE nip = ? AND password = ?",
+    [nip, password],
     (err, results) => {
       if (err) {
-        res.status(500).send({ message: "Error di server" });
+        return res.status(500).send({ message: "Error di server" });
+      } else if (results.length === 0) {
+        return res.status(404).send({ message: "NIP tidak valid" });
       } else if (results.length > 0) {
-        const token = jwt.sign(username, process.env.SECRET_KEY);
+        const token = jwt.sign({ nip: nip }, process.env.SECRET_KEY);
         res.cookie("jwt", token, { httpOnly: true });
-        res.send({ status: 200, message: "success" });
+        res.send({
+          status: 200,
+          message: "success",
+          path: "tjs/admin/dashboard",
+        });
       } else {
-        res.status(404).send({ message: "username atau password salah" });
+        res.status(404).send({ message: "NIP atau password salah" });
       }
     }
   );
 });
 
+app.post("/api/admin/register", async (req, res) => {
+  const { nip, username, password } = req.body;
 
-app.post("/api/admin/register", (req, res) => {
-  const { username, password } = req.body;
+  // validasi nip
+  if (!/^\d{18}$/.test(nip)) {
+    return res
+      .status(400)
+      .send({ message: "NIP harus terdiri dari 18 digit angka" });
+  }
 
-  db.query(
-    "SELECT * FROM admin WHERE username = ?",
-    [username],
-    (err, results) => {
-      if (results.length === 0) {
-        db.query(
-          "INSERT INTO admin (username, password) VALUES (?, ?)",
-          [username, password],
-          (err, result) => {
-            if (err) {
-              res.status(500).send({ message: "Error di server" });
-            } else {
-              res.send({ path: "tjs/admin/login" });
-            }
-          }
-        );
-      } else {
-        res.status(409).json({ message: "Username sudah ada" });
+  if (!validNIPs.includes(nip)) {
+    return res.status(400).send({ message: "NIP tidak valid" });
+  }
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    db.query(
+      "INSERT INTO admin (nip, username, password) VALUES (?, ?, ?)",
+      [nip, username, hashedPassword],
+      (err, result) => {
+        if (err) {
+          res.status(500).send({ message: "Error di server" });
+        } else {
+          res.send({ path: "tjs/admin/login" });
+        }
       }
-    }
-  );
+    );
+  } catch (error) {
+    console.error("Error during registration:", error);
+    res.status(500).send({ message: "Terjadi kesalahan di server." });
+  }
 });
 
 app.get("/api/admin/logout", (req, res) => {
@@ -143,7 +157,6 @@ app.get("/api/getDataById/:id", (req, res) => {
   });
 });
 
-
 app.post("/api/addData", (req, res) => {
   const {
     umkmName,
@@ -167,7 +180,6 @@ app.post("/api/addData", (req, res) => {
   );
 });
 
-
 app.post("/api/editData/:id", (req, res) => {
   const id = req.params.id;
   const data = req.body;
@@ -176,7 +188,16 @@ app.post("/api/editData/:id", (req, res) => {
 
   db.query(
     `UPDATE umkm SET umkm_name = ?, umkm_owner = ?, instagram = ?, whatsapp = ?, lat = ?, lng = ?, gmaps_url = ? WHERE id = ?`,
-    [data.umkmName, data.umkmOwner, data.instagram, whatsapp, data.lat, data.lng, data.gmapsUrl, id],
+    [
+      data.umkmName,
+      data.umkmOwner,
+      data.instagram,
+      whatsapp,
+      data.lat,
+      data.lng,
+      data.gmapsUrl,
+      id,
+    ],
     (err, result) => {
       if (err) throw err;
       res.send({ path: "tjs/admin/dashboard" });
@@ -192,7 +213,6 @@ app.delete("/api/deleteData/:id", (req, res) => {
     res.redirect("/tjs/admin/dashboard");
   });
 });
-
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

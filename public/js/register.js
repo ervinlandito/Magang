@@ -1,39 +1,132 @@
-const form = document.getElementById("registerForm");
-const username = document.getElementById("username");
-const password = document.getElementById("password");
+document.addEventListener("DOMContentLoaded", function () {
+  const form = document.getElementById("registerForm");
+  const nip = document.getElementById("nip");
+  const nipError = document.getElementById("nipError");
+  const username = document.getElementById("username");
+  const passwordInput = document.getElementById("password");
+  const confirmPasswordInput = document.getElementById("confirmPassword");
+  const passwordError = document.getElementById("passwordError");
+  const confirmPasswordError = document.getElementById("confirmPasswordError");
+  const registerButton = document.getElementById("btnRegister");
+  const showPasswordCheckbox = document.getElementById("togglePassword");
 
-function addSpinnerToButton() {
-  var spinnerIcon = document.createElement("i");
-  spinnerIcon.className = "fa fa-spinner fa-spin";
+  const validNIPs = [
+    "123456789012345678",
+    "987654321012345678",
+    "111111111111111111",
+    "222222222222222222",
+    "333333333333333333",
+    // Tambahkan NIP dummy lainnya sesuai kebutuhan
+  ];
 
-  var buttonElement = document.getElementById("btnRegister");
+  function showLoading() {
+    registerButton.disabled = true;
+    const existingSpinner = registerButton.querySelector(".spinner");
+    if (!existingSpinner) {
+      const spinner = document.createElement("span");
+      spinner.className = "spinner";
+      spinner.textContent = " Loading...";
+      registerButton.appendChild(spinner);
+    }
+  }
 
-  buttonElement.appendChild(spinnerIcon);
-}
+  function hideLoading() {
+    registerButton.disabled = false;
+    const spinner = registerButton.querySelector(".spinner");
+    if (spinner) {
+      registerButton.removeChild(spinner);
+    }
+  }
 
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
+  function validatePassword(password) {
+    const passwordPattern =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
 
-  addSpinnerToButton();
+    if (password.length === 0) {
+      return "Password tidak boleh kosong";
+    } else if (!password.match(passwordPattern)) {
+      return "Password harus terdiri dari minimal 8 karakter, dan terdiri dari satu huruf besar, satu huruf kecil, satu angka, dan satu karakter khusus";
+    } else if (password.toLowerCase() === "password") {
+      return 'Password tidak boleh berupa kata "password".';
+    }
+    return "";
+  }
 
-  try {
-    fetch("/api/admin/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        username: username.value,
-        password: password.value,
-      }),
-    })
-      .then((response) => response.json())
-      .then((responseData) => {
+  function validateNIP(nipValue) {
+    if (!/^\d{18}$/.test(nipValue)) {
+      return "NIP harus terdiri dari 18 digit angka.";
+    }
+    if (!validNIPs.includes(nipValue)) {
+      return "NIP tidak valid. Silakan gunakan NIP yang terdaftar.";
+    }
+    return "";
+  }
+
+  function togglePasswordVisibility() {
+    const type = showPasswordCheckbox.checked ? "text" : "password";
+    passwordInput.type = type;
+    confirmPasswordInput.type = type;
+  }
+
+  showPasswordCheckbox.addEventListener("change", togglePasswordVisibility);
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    passwordError.textContent = "";
+    confirmPasswordError.textContent = "";
+    nipError.textContent = "";
+
+    let isValid = true;
+
+    const nipValidationError = validateNIP(nip.value);
+    if (nipValidationError) {
+      nipError.textContent = nipValidationError;
+      isValid = false;
+    }
+
+    const passwordValidationError = validatePassword(passwordInput.value);
+    if (passwordValidationError) {
+      passwordError.textContent = passwordValidationError;
+      isValid = false;
+    }
+
+    if (confirmPasswordInput.value !== passwordInput.value) {
+      confirmPasswordError.textContent = "Passwords do not match.";
+      isValid = false;
+    }
+
+    if (isValid) {
+      showLoading();
+
+      try {
+        const response = await fetch("/api/admin/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            nip: nip.value,
+            username: username.value,
+            password: passwordInput.value,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const responseData = await response.json();
+        alert("Berhasil Mendaftar");
         window.location.replace(
           `${window.location.origin}/${responseData.path}`
         );
-      });
-  } catch (error) {
-    console.error("Error:", error);
-  }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Pendaftaran gagal: " + error.message);
+      } finally {
+        hideLoading();
+      }
+    }
+  });
 });

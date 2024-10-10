@@ -7,6 +7,8 @@ const gmapsUrlField = document.getElementById("gmaps_url");
 const latField = document.getElementById("latitude");
 const lngField = document.getElementById("longitude");
 const el = document.querySelector(".form-container");
+let latitudeError = document.getElementById("latitudeError");
+let longitudeError = document.getElementById("longitudeError");
 
 window.addEventListener("load", function () {
   getData(el.id);
@@ -31,33 +33,45 @@ function removeWaMe(url) {
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
+  let isValid = true;
 
-  addSpinnerToButton();
+  latitudeError.textContent = "";
+  longitudeError.textContent = "";
 
-  try {
-    fetch(`/api/editData/${el.id}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        umkmName: umkmNameField.value,
-        umkmOwner: umkmOwnerField.value,
-        instagram: instagramField.value,
-        whatsapp: whatsappField.value,
-        gmapsUrl: gmapsUrlField.value,
-        lat: latField.value,
-        lng: lngField.value,
-      }),
-    })
-      .then((response) => response.json())
-      .then((responseData) => {
-        window.location.replace(
-          `${window.location.origin}/${responseData.path}`
-        );
-      });
-  } catch (error) {
-    console.error("Error:", error);
+  if (isNaN(latField.value)) {
+    latitudeError.textContent = "Longitude harus berupa angka";
+    isValid = false;
+  } else if (isNaN(lngField.value)) {
+    longitudeError.textContent = "Latitude harus berupa angka";
+    isValid = false;
+  }
+
+  if (isValid) {
+    try {
+      fetch(`/api/editData/${el.id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          umkmName: umkmNameField.value,
+          umkmOwner: umkmOwnerField.value,
+          instagram: instagramField.value,
+          whatsapp: whatsappField.value,
+          gmapsUrl: gmapsUrlField.value,
+          lat: latField.value,
+          lng: lngField.value,
+        }),
+      })
+        .then((response) => response.json())
+        .then((responseData) => {
+          window.location.replace(
+            `${window.location.origin}/${responseData.path}`
+          );
+        });
+    } catch (error) {
+      console.error("Error:", error);
+    }
   }
 });
 
@@ -65,13 +79,13 @@ function getData(id) {
   fetch(`/api/getDataById/${id}`)
     .then((res) => res.json())
     .then((data) => {
-      umkmNameField.value = data[0].umkm_name;
-      umkmOwnerField.value = data[0].umkm_owner;
-      instagramField.value = data[0].instagram;
-      whatsappField.value = removeWaMe(data[0].whatsapp);
-      gmapsUrlField.value = data[0].gmaps_url;
-      latField.value = data[0].lat;
-      lngField.value = data[0].lng;
+      umkmNameField.value = data.umkm_name;
+      umkmOwnerField.value = data.umkm_owner;
+      instagramField.value = data.instagram;
+      whatsappField.value = removeWaMe(data.whatsapp);
+      gmapsUrlField.value = data.gmaps_url;
+      latField.value = data.lat;
+      lngField.value = data.lng;
     })
     .catch((error) => {
       console.error("Error:", error);
