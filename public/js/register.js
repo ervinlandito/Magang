@@ -1,12 +1,23 @@
 document.addEventListener("DOMContentLoaded", function () {
   const form = document.getElementById("registerForm");
-  const emailInput = document.getElementById("email");
+  const nip = document.getElementById("nip");
+  const nipError = document.getElementById("nipError");
+  const username = document.getElementById("username");
   const passwordInput = document.getElementById("password");
   const confirmPasswordInput = document.getElementById("confirmPassword");
   const passwordError = document.getElementById("passwordError");
   const confirmPasswordError = document.getElementById("confirmPasswordError");
   const registerButton = document.getElementById("btnRegister");
   const showPasswordCheckbox = document.getElementById("togglePassword");
+
+  const validNIPs = [
+    "123456789012345678",
+    "987654321012345678",
+    "111111111111111111",
+    "222222222222222222",
+    "333333333333333333",
+    // Tambahkan NIP dummy lainnya sesuai kebutuhan
+  ];
 
   function showLoading() {
     registerButton.disabled = true;
@@ -27,7 +38,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  function validatePassword(password, email) {
+  function validatePassword(password) {
     const passwordPattern =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
 
@@ -37,8 +48,16 @@ document.addEventListener("DOMContentLoaded", function () {
       return "Password harus terdiri dari minimal 8 karakter, dan terdiri dari satu huruf besar, satu huruf kecil, satu angka, dan satu karakter khusus";
     } else if (password.toLowerCase() === "password") {
       return 'Password tidak boleh berupa kata "password".';
-    } else if (email && password.includes(email)) {
-      return "Password tidak boleh mengandung email anda.";
+    }
+    return "";
+  }
+
+  function validateNIP(nipValue) {
+    if (!/^\d{18}$/.test(nipValue)) {
+      return "NIP harus terdiri dari 18 digit angka.";
+    }
+    if (!validNIPs.includes(nipValue)) {
+      return "NIP tidak valid. Silakan gunakan NIP yang terdaftar.";
     }
     return "";
   }
@@ -56,13 +75,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
     passwordError.textContent = "";
     confirmPasswordError.textContent = "";
+    nipError.textContent = "";
 
     let isValid = true;
 
-    const passwordValidationError = validatePassword(
-      passwordInput.value,
-      emailInput.value
-    );
+    const nipValidationError = validateNIP(nip.value);
+    if (nipValidationError) {
+      nipError.textContent = nipValidationError;
+      isValid = false;
+    }
+
+    const passwordValidationError = validatePassword(passwordInput.value);
     if (passwordValidationError) {
       passwordError.textContent = passwordValidationError;
       isValid = false;
@@ -83,7 +106,8 @@ document.addEventListener("DOMContentLoaded", function () {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            email: emailInput.value,
+            nip: nip.value,
+            username: username.value,
             password: passwordInput.value,
           }),
         });
@@ -99,6 +123,7 @@ document.addEventListener("DOMContentLoaded", function () {
         );
       } catch (error) {
         console.error("Error:", error);
+        alert("Pendaftaran gagal: " + error.message);
       } finally {
         hideLoading();
       }

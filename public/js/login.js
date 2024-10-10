@@ -1,8 +1,8 @@
 const form = document.getElementById("loginForm");
-const email = document.getElementById("email");
+const nip = document.getElementById("nip");
 const password = document.getElementById("password");
 const showPasswordCheckbox = document.getElementById("togglePassword");
-let loginButton = document.getElementById("btnLogin");
+const loginButton = document.getElementById("btnLogin");
 
 function showLoading() {
   loginButton.disabled = true;
@@ -10,7 +10,7 @@ function showLoading() {
   if (!existingSpinner) {
     const spinner = document.createElement("span");
     spinner.className = "spinner";
-    spinner.textContent = "...";
+    spinner.textContent = " Loading...";
     loginButton.appendChild(spinner);
   }
 }
@@ -32,42 +32,39 @@ showPasswordCheckbox.addEventListener("change", togglePasswordVisibility);
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
-  showLoading();
 
-  if (email.value.length === 0) {
-    alert("Email tidak boleh kosong");
+  if (nip.value.length === 0) {
+    alert("NIP tidak boleh kosong");
+  } else if (nip.value.length !== 18) {
+    alert("NIP harus berjumlah 18 digit");
   }
-  if (password.length === 0) {
+
+  if (password.value.length === 0) {
     alert("Password tidak boleh kosong");
   }
 
   try {
-    fetch("/api/admin/login", {
+    const response = await fetch("/api/admin/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        email: email.value,
+        nip: nip.value,
         password: password.value,
       }),
-    })
-      .then((response) => response.json())
-      .then((responseData) => {
-        if (responseData.status === 404) {
-          alert(responseData.message);
-          hideLoading();
-        } else if (responseData.status === 200) {
-          fetch(`/api/admin/verification`)
-            .then((response) => response.json())
-            .then((responseData) => {
-              window.location.replace(
-                `${window.location.origin}/${responseData.path}`
-              );
-            });
-        }
-      });
+    });
+
+    const responseData = await response.json();
+    hideLoading();
+
+    if (responseData.status === 404) {
+      alert(responseData.message);
+    } else if (responseData.status === 200) {
+      window.location.replace(`${window.location.origin}/${responseData.path}`);
+    }
   } catch (error) {
     console.error("Error:", error);
+    hideLoading();
   }
 });
