@@ -65,30 +65,32 @@ app.get("/tjs/admin/edit/:id", (req, res) => {
 });
 
 // API routes
-app.post("/api/admin/login", (req, res) => {
+app.post("/api/admin/login", async (req, res) => {
   const { nip, password } = req.body;
-
-  db.query(
-    "SELECT * FROM admin WHERE nip = ? AND password = ?",
-    [nip, password],
-    (err, results) => {
-      if (err) {
-        return res.status(500).send({ message: "Error di server" });
-      } else if (results.length === 0) {
-        return res.status(404).send({ message: "NIP tidak valid" });
-      } else if (results.length > 0) {
-        const token = jwt.sign({ nip: nip }, process.env.SECRET_KEY);
-        res.cookie("jwt", token, { httpOnly: true });
-        res.send({
-          status: 200,
-          message: "success",
-          path: "tjs/admin/dashboard",
-        });
-      } else {
-        res.status(404).send({ message: "NIP atau password salah" });
-      }
+  db.query("SELECT * FROM admin WHERE nip = ?", [nip], async (err, results) => {
+    if (err) {
+      return res.status(500).send({ message: "Error di server" });
     }
-  );
+
+    if (results.length === 0) {
+      return res.status(404).send({ message: "NIP tidak ditemukan" });
+    }
+
+    const storedPassword = results[0].password;
+
+    const passwordIsValid = await bcrypt.compare(password, storedPassword);
+
+    if (!passwordIsValid) {
+      return res.status(401).send({ message: "Password salah" });
+    }
+    const token = jwt.sign({ nip: nip }, process.env.SECRET_KEY);
+    res.cookie("jwt", token, { httpOnly: true });
+    res.send({
+      status: 200,
+      message: "success",
+      path: "tjs/admin/dashboard",
+    });
+  });
 });
 
 app.post("/api/admin/register", async (req, res) => {
@@ -218,3 +220,5 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+
+module.exports = app;
