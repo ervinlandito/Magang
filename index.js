@@ -52,7 +52,7 @@ app.get("/tjs/admin/dashboard", (req, res) => {
   if (token) {
     db.query("SELECT * FROM umkm", (err, results) => {
       if (err) throw err;
-      res.render("admin", { data: results }); // kirim data hasil query ke halaman admin
+      res.render("admin", { data: results });
     });
   } else {
     res.redirect("/tjs/admin/login");
@@ -83,6 +83,7 @@ app.post("/api/admin/login", async (req, res) => {
     if (!passwordIsValid) {
       return res.status(401).send({ message: "Password salah" });
     }
+
     const token = jwt.sign({ nip: nip }, process.env.SECRET_KEY);
     res.cookie("jwt", token, { httpOnly: true });
     res.send({
