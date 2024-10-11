@@ -3,6 +3,7 @@ const nip = document.getElementById("nip");
 const password = document.getElementById("password");
 const showPasswordCheckbox = document.getElementById("togglePassword");
 const loginButton = document.getElementById("btnLogin");
+const errorMessage = document.getElementById("errorMessage");
 
 function showLoading() {
   loginButton.disabled = true;
@@ -33,14 +34,23 @@ showPasswordCheckbox.addEventListener("change", togglePasswordVisibility);
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
+  errorMessage.textContent = "";
+  errorMessage.style.display = "none";
+
   if (nip.value.length === 0) {
-    alert("NIP tidak boleh kosong");
+    errorMessage.textContent = "NIP tidak boleh kosong";
+    errorMessage.style.display = "block";
+    return;
   } else if (nip.value.length !== 18) {
-    alert("NIP harus berjumlah 18 digit");
+    errorMessage.textContent = "NIP harus berjumlah 18 digit";
+    errorMessage.style.display = "block";
+    return;
   }
 
   if (password.value.length === 0) {
-    alert("Password tidak boleh kosong");
+    errorMessage.textContent = "Password tidak boleh kosong";
+    errorMessage.style.display = "block";
+    return;
   }
 
   try {
@@ -57,10 +67,11 @@ form.addEventListener("submit", async (e) => {
 
     const responseData = await response.json();
     hideLoading();
-
-    if (responseData.status === 404) {
-      alert(responseData.message);
-    } else if (responseData.status === 200) {
+    if (response.status === 404) {
+      swal("Error!", responseData.message, "error");
+    } else if (response.status === 401) {
+      swal("Error!", responseData.message, "error");
+    } else if (response.status === 200) {
       window.location.replace(`${window.location.origin}/${responseData.path}`);
     }
   } catch (error) {

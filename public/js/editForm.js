@@ -79,13 +79,14 @@ function getData(id) {
   fetch(`/api/getDataById/${id}`)
     .then((res) => res.json())
     .then((data) => {
-      umkmNameField.value = data.umkm_name;
-      umkmOwnerField.value = data.umkm_owner;
-      instagramField.value = data.instagram;
-      whatsappField.value = removeWaMe(data.whatsapp);
-      gmapsUrlField.value = data.gmaps_url;
-      latField.value = data.lat;
-      lngField.value = data.lng;
+      console.log(data);
+      umkmNameField.value = data[0].umkm_name;
+      umkmOwnerField.value = data[0].umkm_owner;
+      instagramField.value = data[0].instagram;
+      whatsappField.value = removeWaMe(data[0].whatsapp);
+      gmapsUrlField.value = data[0].gmaps_url;
+      latField.value = data[0].lat;
+      lngField.value = data[0].lng;
     })
     .catch((error) => {
       console.error("Error:", error);
