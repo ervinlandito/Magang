@@ -101,7 +101,6 @@ deleteButtons.forEach(function (button) {
             if (data) {
               Swal.fire("Deleted!", "Data berhasil dihapus!", "success");
               el.remove();
-              window.location.reload();
             } else {
               Swal.fire("Error", "Gagal menghapus data!", "error");
             }

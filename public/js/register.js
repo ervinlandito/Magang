@@ -43,6 +43,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (password.length === 0) {
       return "Password tidak boleh kosong";
+    } else if (password.length > 20) {
+      return "Password tidak boleh lebih dari 20 karakter";
     } else if (!password.match(passwordPattern)) {
       return "Password harus terdiri dari minimal 8 karakter, dan terdiri dari satu huruf besar, satu huruf kecil, satu angka, dan satu karakter khusus";
     } else if (password.toLowerCase() === "password") {
@@ -90,7 +92,15 @@ document.addEventListener("DOMContentLoaded", function () {
       isValid = false;
     }
 
-    if (confirmPasswordInput.value !== passwordInput.value) {
+    if (confirmPasswordInput.value.length < 8) {
+      confirmPasswordError.textContent =
+        "Confirm password tidak boleh kurang dari 8 karakter.";
+      isValid = false;
+    } else if (confirmPasswordInput.value.length > 20) {
+      confirmPasswordError.textContent =
+        "Confirm password tidak boleh lebih dari 20 karakter.";
+      isValid = false;
+    } else if (confirmPasswordInput.value !== passwordInput.value) {
       confirmPasswordError.textContent = "Passwords do not match.";
       isValid = false;
     }
