@@ -19,7 +19,9 @@ searchInput.addEventListener("input", function () {
   });
 });
 
-form.addEventListener("submit", async () => {
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
   const umkmName = document.getElementById("umkm_name").value;
   const umkmOwner = document.getElementById("umkm_owner").value;
   const instagramUrl = document.getElementById("instagram_url").value;
@@ -28,6 +30,7 @@ form.addEventListener("submit", async () => {
   const lat = parseFloat(document.getElementById("latitude").value);
   const lng = parseFloat(document.getElementById("longitude").value);
 
+  const umkmNameError = document.getElementById("umkmNameError");
   let latitudeError = document.getElementById("latitudeError");
   let longitudeError = document.getElementById("longitudeError");
 
@@ -35,6 +38,11 @@ form.addEventListener("submit", async () => {
 
   latitudeError.textContent = "";
   longitudeError.textContent = "";
+
+  if (umkmName.length < 2 || umkmName.length > 25) {
+    umkmNameError.textContent = "Nama UMKM harus terdiri dari 2-25 karakter.";
+    isValid = false;
+  }
 
   if (isNaN(lat)) {
     latitudeError.textContent = "Longitude harus berupa angka";
@@ -101,7 +109,6 @@ deleteButtons.forEach(function (button) {
             if (data) {
               Swal.fire("Deleted!", "Data berhasil dihapus!", "success");
               el.remove();
-              window.location.reload();
             } else {
               Swal.fire("Error", "Gagal menghapus data!", "error");
             }
