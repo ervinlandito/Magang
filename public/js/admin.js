@@ -76,13 +76,37 @@ form.addEventListener("submit", async () => {
 deleteButtons.forEach(function (button) {
   button.addEventListener("click", async function () {
     const el = this.closest("tr");
-
-    alert("apakah anda yakin mau menghapus data?");
-
-    await fetch(`/api/deleteData/${el.id}`, {
-      method: "DELETE",
-    }).then(function () {
-      window.location.reload();
+    Swal.fire({
+      title: "Anda yakin?",
+      text: "Data ini akan terhapus dari sistem!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Ya, hapus saja!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`/api/deleteData/${el.id}`, {
+          method: "DELETE",
+        })
+          .then(async (response) => {
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.includes("application/json")) {
+              return response.json();
+            } else {
+              throw new Error("Response is not JSON");
+            }
+          })
+          .then((data) => {
+            if (data) {
+              Swal.fire("Deleted!", "Data berhasil dihapus!", "success");
+              el.remove();
+              window.location.reload();
+            } else {
+              Swal.fire("Error", "Gagal menghapus data!", "error");
+            }
+          });
+      }
     });
   });
 });
