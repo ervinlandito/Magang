@@ -97,44 +97,33 @@
         <div class="modal-body">
           <form id="addDataForm">
             <label for="umkm_name">Nama UMKM</label>
+            <input type="text" id="umkm_name" name="umkm_name" class="form-input px-2 py-2 mb-0" required>
+            <span id="umkmNameError" class="text-danger"></span> <!-- Error span for UMKM Name -->
             <br>
-            <input type="text" id="umkm_name" name="umkm_name" class="form-input px-2 py-2" required>
-            <span id="umkmNameError" style="color: red;"></span>
-            <br>
-
             <label for="umkm_owner">Pemilik UMKM</label>
+            <input type="text" id="umkm_owner" name="umkm_owner" class="form-input px-2 py-2 mb-0" required>
+            <span id="umkmOwnerError" class="text-danger"></span> <!-- Error span for UMKM Owner -->
             <br>
-            <input type="text" id="umkm_owner" name="umkm_owner" class="form-input px-2 py-2" required>
-            <br>
-
             <label for="instagram_url">Link Instagram</label>
+            <input type="text" id="instagram_url" name="instagram_url" class="form-input px-2 py-2 mb-0" required>
+            <span id="instagramUrlError" class="text-danger"></span> <!-- Error span for Instagram URL -->
             <br>
-            <input type="text" id="instagram_url" name="instagram_url" class="form-input px-2 py-2" required>
-            <br>
-
             <label for="whatsapp_number">Whatsapp</label>
-            <br>
             <input type="text" id="whatsapp_number" name="whatsapp_number" class="form-input px-2 py-2 mb-0" required>
-            <br>
             <div id="whatsapp_number_help" class="form-text">Cukup masukkan nomor hp saja</div>
-            <br>
+            <span id="whatsappNumberError" class="text-danger"></span> <!-- Error span for WhatsApp Number -->
 
             <label for="gmaps_url">Link Google Maps</label>
+            <input type="text" id="gmaps_url" name="gmaps_url" class="form-input px-2 py-2 mb-0" required>
+            <span id="gmapsUrlError" class="text-danger"></span> <!-- Error span for Google Maps URL -->
             <br>
-            <input type="text" id="gmaps_url" name="gmaps_url" class="form-input px-2 py-2" required>
+            <label for="latitude">Latitude</label>
+            <input type="text" id="latitude" name="latitude" class="form-input px-2 py-2 ">
+            <span id="latitudeError" class="text-danger"></span> <!-- Error span for Latitude -->
             <br>
-
-            <label for="gmaps_url">Latitude</label>
-            <br>
-            <input type="text" id="latitude" name="latitude" class="form-input px-2 py-2" required>
-            <small id="latitudeError" class="text-danger"></small>
-            <br>
-
-            <label for="gmaps_url">Longitude</label>
-            <br>
-            <input type="text" id="longitude" name="Longitude" class="form-input px-2 py-2" required>
-            <small id="longitudeError" class="text-danger"></small>
-            <br>
+            <label for="longitude">Longitude</label>
+            <input type="text" id="longitude" name="longitude" class="form-input px-2 py-2">
+            <span id="longitudeError" class="text-danger"></span> <!-- Error span for Longitude -->
 
             <button type="submit" class="btn btn-dark btn-submit py-3">Simpan</button>
           </form>

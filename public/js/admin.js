@@ -31,11 +31,20 @@ form.addEventListener("submit", async (e) => {
   const lng = parseFloat(document.getElementById("longitude").value);
 
   const umkmNameError = document.getElementById("umkmNameError");
-  let latitudeError = document.getElementById("latitudeError");
-  let longitudeError = document.getElementById("longitudeError");
+  const umkmOwnerError = document.getElementById("umkmOwnerError");
+  const instagramUrlError = document.getElementById("instagramUrlError");
+  const whatsappNumberError = document.getElementById("whatsappNumberError");
+  const gmapsUrlError = document.getElementById("gmapsUrlError");
+  const latitudeError = document.getElementById("latitudeError");
+  const longitudeError = document.getElementById("longitudeError");
 
   let isValid = true;
 
+  umkmNameError.textContent = "";
+  umkmOwnerError.textContent = "";
+  instagramUrlError.textContent = "";
+  whatsappNumberError.textContent = "";
+  gmapsUrlError.textContent = "";
   latitudeError.textContent = "";
   longitudeError.textContent = "";
 
@@ -44,13 +53,35 @@ form.addEventListener("submit", async (e) => {
     isValid = false;
   }
 
-  if (isNaN(lat)) {
-    latitudeError.textContent = "Longitude harus berupa angka";
-    isValid = false;
-  } else if (isNaN(lng)) {
-    longitudeError.textContent = "Latitude harus berupa angka";
+  if (umkmOwner.length < 2 || umkmOwner.length > 35) {
+    umkmOwnerError.textContent =
+      "Nama Pemilik harus terdiri dari 2-35 karakter.";
     isValid = false;
   }
+
+  if (instagramUrl.length < 2 || instagramUrl.length > 50) {
+    instagramUrlError.textContent =
+      "Link Instagram harus terdiri dari 2-50 karakter.";
+    isValid = false;
+  }
+
+  if (whatsappNumber.length !== 12) {
+    whatsappNumberError.textContent =
+      "Nomor WhatsApp harus terdiri dari 12 karakter.";
+    isValid = false;
+  }
+
+  if (gmapsUrl.length < 25 || gmapsUrl.length > 255) {
+    gmapsUrlError.textContent =
+      "Link Google Maps harus terdiri dari 25-255 karakter.";
+    isValid = false;
+  }
+
+  // if (isNaN(lat)) {
+  //   latitudeError.textContent = "Longitude harus berupa angka";
+  // } else if (isNaN(lng)) {
+  //   longitudeError.textContent = "Latitude harus berupa angka";
+  // }
 
   if (isValid) {
     try {
