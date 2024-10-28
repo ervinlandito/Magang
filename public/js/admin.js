@@ -59,15 +59,15 @@ form.addEventListener("submit", async (e) => {
     isValid = false;
   }
 
-  if (instagramUrl.length < 2 || instagramUrl.length > 50) {
+  if (instagramUrl.length < 25 || instagramUrl.length > 50) {
     instagramUrlError.textContent =
-      "Link Instagram harus terdiri dari 2-50 karakter.";
+      "Link Instagram harus terdiri dari 25-50 karakter.";
     isValid = false;
   }
 
   if (whatsappNumber.length !== 12) {
     whatsappNumberError.textContent =
-      "Nomor WhatsApp harus terdiri dari 12 karakter.";
+      "Nomor WhatsApp harus terdiri dari 12 angka.";
     isValid = false;
   }
 
