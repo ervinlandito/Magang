@@ -44,7 +44,9 @@ document.addEventListener("DOMContentLoaded", function () {
     if (password.length === 0) {
       return "Password tidak boleh kosong";
     } else if (password.length > 20) {
-      return "Password tidak boleh lebih dari 20 karakter";
+      return "Password harus terdiri dari maksimal 20 karakter";
+    } else if (password.length < 8) {
+      return "Password harus minimal 8 karakter";
     } else if (!password.match(passwordPattern)) {
       return "Password harus terdiri dari minimal 8 karakter, dan terdiri dari satu huruf besar, satu huruf kecil, satu angka, dan satu karakter khusus";
     } else if (password.toLowerCase() === "password") {
@@ -54,8 +56,11 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function validateNIP(nipValue) {
+    if (nipValue.length < 18 || nipValue.length > 18) {
+      return "NIP harus berjumlah 18 digit";
+    }
     if (!/^\d{18}$/.test(nipValue)) {
-      return "NIP harus terdiri dari 18 digit angka.";
+      return "NIP tidak valid. Silakan gunakan NIP yang terdaftar.";
     }
     if (!validNIPs.includes(nipValue)) {
       return "NIP tidak valid. Silakan gunakan NIP yang terdaftar.";
@@ -98,10 +103,10 @@ document.addEventListener("DOMContentLoaded", function () {
       isValid = false;
     } else if (confirmPasswordInput.value.length > 20) {
       confirmPasswordError.textContent =
-        "Confirm password tidak boleh lebih dari 20 karakter.";
+        "Password harus terdiri dari maksimal 20 karakter";
       isValid = false;
     } else if (confirmPasswordInput.value !== passwordInput.value) {
-      confirmPasswordError.textContent = "Passwords do not match.";
+      confirmPasswordError.textContent = "konfirmasi password tidak sama";
       isValid = false;
     }
 

@@ -1,21 +1,11 @@
 const request = require("supertest");
 const app = require("./index");
-const bcrypt = require("bcrypt");
-const mysql = require("mysql2/promise");
 const jwt = require("jsonwebtoken");
-
-jest.mock("mysql2/promise");
 
 // Auth Endpoint
 describe("Authentication Endpoints", () => {
   describe("POST /api/admin/register", () => {
     it("should successfully register a new admin", async () => {
-      const mockExecute = jest.fn().mockResolvedValue([{ insertId: 1 }]);
-      mysql.createConnection.mockResolvedValue({
-        execute: mockExecute,
-        end: jest.fn(),
-      });
-
       const response = await request(app).post("/api/admin/register").send({
         nip: "123456789012345678",
         username: "testuser",
@@ -43,17 +33,6 @@ describe("Authentication Endpoints", () => {
 
   describe("POST /api/admin/login", () => {
     it("should return a token on successful login", async () => {
-      const mockUser = {
-        nip: "123456789012345678",
-        password: await bcrypt.hash("password123", 10),
-      };
-
-      const mockExecute = jest.fn().mockResolvedValue([[mockUser]]);
-      mysql.createConnection.mockResolvedValue({
-        execute: mockExecute,
-        end: jest.fn(),
-      });
-
       const response = await request(app)
         .post("/api/admin/login")
         .send({ nip: "123456789012345678", password: "password123" });
@@ -66,12 +45,6 @@ describe("Authentication Endpoints", () => {
     });
 
     it("should return an error on invalid NIP", async () => {
-      const mockExecute = jest.fn().mockResolvedValue([[]]);
-      mysql.createConnection.mockResolvedValue({
-        execute: mockExecute,
-        end: jest.fn(),
-      });
-
       const response = await request(app)
         .post("/api/admin/login")
         .send({ nip: "123456789012345678", password: "wrongpassword" });
@@ -84,17 +57,6 @@ describe("Authentication Endpoints", () => {
     });
 
     it("should return an error on incorrect password", async () => {
-      const mockUser = {
-        nip: "123456789012345678",
-        password: await bcrypt.hash("correctpassword", 10),
-      };
-
-      const mockExecute = jest.fn().mockResolvedValue([[mockUser]]);
-      mysql.createConnection.mockResolvedValue({
-        execute: mockExecute,
-        end: jest.fn(),
-      });
-
       const response = await request(app)
         .post("/api/admin/login")
         .send({ nip: "123456789012345678", password: "wrongpassword" });
@@ -112,16 +74,6 @@ describe("Authentication Endpoints", () => {
 describe("Data Management Endpoints", () => {
   describe("GET /api/location", () => {
     it("should return all UMKM locations", async () => {
-      const mockLocations = [
-        { id: 1, umkm_name: "Test UMKM", lat: -6.2088, lng: 106.8456 },
-      ];
-
-      const mockExecute = jest.fn().mockResolvedValue([mockLocations]);
-      mysql.createConnection.mockResolvedValue({
-        execute: mockExecute,
-        end: jest.fn(),
-      });
-
       const response = await request(app).get("/api/location");
 
       expect(response.status).toBe(200);
@@ -131,12 +83,6 @@ describe("Data Management Endpoints", () => {
 
   describe("POST /api/addData", () => {
     it("should successfully add new UMKM data", async () => {
-      const mockExecute = jest.fn().mockResolvedValue([{ insertId: 1 }]);
-      mysql.createConnection.mockResolvedValue({
-        execute: mockExecute,
-        end: jest.fn(),
-      });
-
       const response = await request(app).post("/api/addData").send({
         umkmName: "New UMKM",
         umkmOwner: "John Doe",
@@ -166,14 +112,6 @@ describe("Admin Dashboard Protection", () => {
       { nip: "123456789012345678" },
       process.env.SECRET_KEY
     );
-
-    const mockExecute = jest
-      .fn()
-      .mockResolvedValue([[{ id: 1, umkm_name: "Test UMKM" }]]);
-    mysql.createConnection.mockResolvedValue({
-      execute: mockExecute,
-      end: jest.fn(),
-    });
 
     const response = await request(app)
       .get("/tjs/admin/dashboard")
