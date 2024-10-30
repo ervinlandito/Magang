@@ -47,12 +47,22 @@ form.addEventListener("submit", async (e) => {
     return;
   }
 
-  if (password.value.length === 0) {
-    errorMessage.textContent = "Password tidak boleh kosong";
+  if (password.value.length < 8) {
+    errorMessage.textContent = "Password salah";
+    errorMessage.style.display = "block";
+    return;
+  } else if (password.value.length > 20) {
+    errorMessage.textContent = "Password salah";
     errorMessage.style.display = "block";
     return;
   }
 
+  // Cek jika password hanya terdiri dari angka (tidak mengandung huruf atau karakter khusus)
+  if (/^\d+$/.test(password.value)) {
+    errorMessage.textContent = "Password salah";
+    errorMessage.style.display = "block";
+    return;
+  }
   try {
     const response = await fetch("/api/admin/login", {
       method: "POST",
