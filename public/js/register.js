@@ -56,11 +56,8 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function validateNIP(nipValue) {
-    if (nipValue.length < 18 || nipValue.length > 18) {
-      return "NIP harus berjumlah 18 digit";
-    }
     if (!/^\d{18}$/.test(nipValue)) {
-      return "NIP tidak valid. Silakan gunakan NIP yang terdaftar.";
+      return "NIP harus berjumlah 18 digit";
     }
     if (!validNIPs.includes(nipValue)) {
       return "NIP tidak valid. Silakan gunakan NIP yang terdaftar.";
