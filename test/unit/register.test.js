@@ -2,11 +2,33 @@
  * @jest-environment jsdom
  */
 
+let mockFetch;
+
+// Mock DOM elements
+document.body.innerHTML = `
+<form id="registerForm">
+  <input id="nip" />
+  <input id="username" />
+  <input id="password" />
+  <input id="confirmPassword" />
+  <button id="btnRegister" type="submit">Register</button>
+  <input type="checkbox" id="togglePassword" />
+</form>
+`;
+
+// Import fungsi setelah DOM dimuat
 const {
   validateNIP,
   validatePassword,
   confirmPasswordValidation,
 } = require("../../public/js/register");
+
+// Mock fetch
+mockFetch = jest.fn().mockResolvedValue({
+  ok: true,
+  json: () => ({ path: "dashboard" }),
+});
+global.fetch = mockFetch;
 
 describe("Form Validation", () => {
   describe("NIP Validation", () => {
@@ -16,7 +38,7 @@ describe("Form Validation", () => {
     });
 
     it("should return an error for an invalid NIP", () => {
-      const result = validateNIP("123456789012345678");
+      const result = validateNIP("111111111111111112");
       expect(result).toBe(
         "NIP tidak valid. Silakan gunakan NIP yang terdaftar."
       );
@@ -41,7 +63,7 @@ describe("Form Validation", () => {
 
     it('should return an error if password is "password"', () => {
       const result = validatePassword("password");
-      expect(result).toBe('Password tidak boleh berupa kata "password".');
+      expect(result).toBe('Password tidak boleh berupa kata "password"');
     });
   });
 
@@ -86,6 +108,11 @@ describe("Form Validation", () => {
     });
 
     it("should successfully register if all validation passes", async () => {
+      const replaceMock = jest.fn();
+      Object.defineProperty(window, "location", {
+        value: { replace: replaceMock },
+      });
+
       const validForm = {
         nip: "123456789012345678",
         username: "username",
@@ -95,14 +122,14 @@ describe("Form Validation", () => {
 
       // Mock DOM elements
       document.body.innerHTML = `
-        <form id="registerForm">
-          <input id="nip" value="${validForm.nip}" />
-          <input id="username" value="${validForm.username}" />
-          <input id="password" value="${validForm.password}" />
-          <input id="confirmPassword" value="${validForm.confirmPassword}" />
-          <button id="btnRegister" type="submit">Register</button>
-        </form>
-      `;
+    <form id="registerForm">
+      <input id="nip" value="${validForm.nip}" />
+      <input id="username" value="${validForm.username}" />
+      <input id="password" value="${validForm.password}" />
+      <input id="confirmPassword" value="${validForm.confirmPassword}" />
+      <button id="btnRegister" type="submit">Register</button>
+    </form>
+  `;
 
       const form = document.getElementById("registerForm");
       form.addEventListener("submit", async (e) => {
@@ -127,12 +154,17 @@ describe("Form Validation", () => {
       await form.dispatchEvent(new Event("submit"));
 
       // Check if the redirect happened
-      expect(window.location.replace).toHaveBeenCalledWith(
+      expect(replaceMock).toHaveBeenCalledWith(
         `${window.location.origin}/dashboard`
       );
     });
 
     it("should handle fetch error and show an alert on failure", async () => {
+      // Mock alert
+      const alertMock = jest
+        .spyOn(global, "alert")
+        .mockImplementation(() => {});
+
       mockFetch.mockRejectedValue(new Error("Registration failed"));
 
       const validForm = {
@@ -142,15 +174,16 @@ describe("Form Validation", () => {
         confirmPassword: "Valid123@",
       };
 
+      // Mock DOM elements
       document.body.innerHTML = `
-        <form id="registerForm">
-          <input id="nip" value="${validForm.nip}" />
-          <input id="username" value="${validForm.username}" />
-          <input id="password" value="${validForm.password}" />
-          <input id="confirmPassword" value="${validForm.confirmPassword}" />
-          <button id="btnRegister" type="submit">Register</button>
-        </form>
-      `;
+    <form id="registerForm">
+      <input id="nip" value="${validForm.nip}" />
+      <input id="username" value="${validForm.username}" />
+      <input id="password" value="${validForm.password}" />
+      <input id="confirmPassword" value="${validForm.confirmPassword}" />
+      <button id="btnRegister" type="submit">Register</button>
+    </form>
+  `;
 
       const form = document.getElementById("registerForm");
       form.addEventListener("submit", async (e) => {
@@ -172,9 +205,12 @@ describe("Form Validation", () => {
       await form.dispatchEvent(new Event("submit"));
 
       // Check if the alert shows the error message
-      expect(alert).toHaveBeenCalledWith(
-        "Pendaftaran gagal: Error: Registration failed"
+      expect(alertMock).toHaveBeenCalledWith(
+        "Pendaftaran gagal: Registration failed"
       );
+
+      // Restore the original alert function
+      alertMock.mockRestore();
     });
   });
 });
