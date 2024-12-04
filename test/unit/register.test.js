@@ -107,10 +107,20 @@ describe("Form Validation", () => {
       jest.resetAllMocks();
     });
 
-    it("should successfully register if all validation passes", async () => {
-      const replaceMock = jest.fn();
+    it("should successfully register and show success alert", async () => {
+      // Mock spy on alert
+      const alertMock = jest
+        .spyOn(global, "alert")
+        .mockImplementation(() => {});
+
+      // Mocking window.location.replace
+      const locationReplaceMock = jest.fn();
       Object.defineProperty(window, "location", {
-        value: { replace: replaceMock },
+        value: {
+          origin: "http://localhost", // Explicitly set origin
+          replace: locationReplaceMock,
+        },
+        writable: true,
       });
 
       const validForm = {
@@ -120,43 +130,70 @@ describe("Form Validation", () => {
         confirmPassword: "Valid123@",
       };
 
+      // Mock fetch to return success
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ path: "dashboard" }),
+      });
+
       // Mock DOM elements
       document.body.innerHTML = `
-    <form id="registerForm">
-      <input id="nip" value="${validForm.nip}" />
-      <input id="username" value="${validForm.username}" />
-      <input id="password" value="${validForm.password}" />
-      <input id="confirmPassword" value="${validForm.confirmPassword}" />
-      <button id="btnRegister" type="submit">Register</button>
-    </form>
-  `;
+        <form id="registerForm">
+          <input id="nip" value="${validForm.nip}" />
+          <input id="username" value="${validForm.username}" />
+          <input id="password" value="${validForm.password}" />
+          <input id="confirmPassword" value="${validForm.confirmPassword}" />
+          <button id="btnRegister" type="submit">Register</button>
+        </form>
+      `;
 
       const form = document.getElementById("registerForm");
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const response = await fetch("/api/admin/register", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(validForm),
-        });
 
-        if (response.ok) {
-          const responseData = await response.json();
-          window.location.replace(
-            `${window.location.origin}/${responseData.path}`
-          );
-        }
+      // Create promise to handle form submission
+      const submissionPromise = new Promise((resolve) => {
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          try {
+            const response = await fetch("/api/admin/register", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(validForm),
+            });
+
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const responseData = await response.json();
+            alert("Berhasil Mendaftar");
+            window.location.replace(
+              `${window.location.origin}/${responseData.path}`
+            );
+            resolve();
+          } catch (error) {
+            console.error("Error:", error);
+            alert("Pendaftaran gagal: " + error.message);
+            resolve();
+          }
+        });
       });
 
       // Simulate form submission
-      await form.dispatchEvent(new Event("submit"));
+      form.dispatchEvent(new Event("submit"));
 
-      // Check if the redirect happened
-      expect(replaceMock).toHaveBeenCalledWith(
+      // Wait for submission to complete
+      await submissionPromise;
+
+      // Verify alert and location.replace were called correctly
+      await expect(alertMock).toHaveBeenCalledWith("Berhasil Mendaftar");
+      await expect(locationReplaceMock).toHaveBeenCalledWith(
         `${window.location.origin}/dashboard`
       );
+
+      // Restore mocks
+      alertMock.mockRestore();
     });
 
     it("should handle fetch error and show an alert on failure", async () => {
@@ -176,14 +213,14 @@ describe("Form Validation", () => {
 
       // Mock DOM elements
       document.body.innerHTML = `
-    <form id="registerForm">
-      <input id="nip" value="${validForm.nip}" />
-      <input id="username" value="${validForm.username}" />
-      <input id="password" value="${validForm.password}" />
-      <input id="confirmPassword" value="${validForm.confirmPassword}" />
-      <button id="btnRegister" type="submit">Register</button>
-    </form>
-  `;
+        <form id="registerForm">
+          <input id="nip" value="${validForm.nip}" />
+          <input id="username" value="${validForm.username}" />
+          <input id="password" value="${validForm.password}" />
+          <input id="confirmPassword" value="${validForm.confirmPassword}" />
+          <button id="btnRegister" type="submit">Register</button>
+        </form>
+      `;
 
       const form = document.getElementById("registerForm");
       form.addEventListener("submit", async (e) => {
